@@ -5,6 +5,8 @@ import com.codecareers.schoolplannerapi.model.Assignment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -369,6 +371,7 @@ public class SimpleTextDBImp implements SimpleTextDB<Assignment> {
         // Assigment Instance to fill up and return to show the
         // data from the found Assignment in the "database"
         Assignment foundAssign = new Assignment();
+        foundAssign.setAssignmentID(id);
 
         try {
             // Open the "database" workbook
@@ -413,9 +416,6 @@ public class SimpleTextDBImp implements SimpleTextDB<Assignment> {
             tableRowCell = tableRow.getCell(cellNum);
             foundAssign.setDueDate(tableRowCell.getStringCellValue());
 
-            // Write workbook to file
-            FileOutputStream outputStream = new FileOutputStream(FILENAME);
-            workbook.write(outputStream);
             workbook.close();
 
             log.info("Assignment with ID " + id + " found");
@@ -425,6 +425,197 @@ public class SimpleTextDBImp implements SimpleTextDB<Assignment> {
         }
         
         return foundAssign;
+    }
+
+    /**
+     * Implementation of findByID() function used to find an assigment by ID
+     * @param id
+     * @return the Assignment found with the ID or null if no assigment could be found
+     */
+    @Override
+    public List<Assignment> findByClass(String classCategory) {
+        // Check if "database" file exists, if not update was not successful
+        if(!doesDBExist()) {
+            log.info("Could not update since no Database Exists");
+            return null;
+        }
+
+        // Assigment Instance to fill up and return to show the
+        // data from the found Assignment in the "database"
+        List<Assignment> assignmentList = new ArrayList<>();
+
+        try {
+            // Open the "database" workbook
+            FileInputStream file = new FileInputStream(FILENAME);
+            XSSFWorkbook workbook = new XSSFWorkbook(file);
+
+            // Grab the Assignments sheet from the workbook
+            XSSFSheet sheet = workbook.getSheet(TABLE_ASSIGNMENTS);
+
+            // Grab Row where assignments start
+            int rowNum = 2;
+            Row tableRow = sheet.getRow(rowNum);
+
+            // Loop through the entire sheet row by row to find the Assignments we want to add
+            while(tableRow != null && tableRow.getLastCellNum() > 0) {
+                // Check if the class of the assignment matches, if not skip to the next row iteration using continue keyword
+                log.info("Do classes (" + tableRow.getCell(2) + ", " + classCategory + ") match: " + (tableRow.getCell(2).toString().toLowerCase().equals(classCategory.toLowerCase())));
+                if(!tableRow.getCell(2).toString().toLowerCase().equals(classCategory.toLowerCase())) {
+                    rowNum++;
+                    tableRow = sheet.getRow(rowNum);
+                    continue;
+                }
+
+                // Create a new Assignment Object to save info into
+                Assignment foundAssign = new Assignment();
+                foundAssign.setAssignmentID(rowNum);
+                
+                // Keep track of current cell
+                int cellNum = 0;
+                
+                // Set name
+                Cell tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setName(tableRowCell.getStringCellValue());
+
+                // Set description
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setDescription(tableRowCell.getStringCellValue());
+
+                // Set class
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setClassCategory(tableRowCell.getStringCellValue());
+
+                // Set isComplete
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setIsComplete(tableRowCell.getBooleanCellValue());
+
+                // Skip createDate since it shouldn't change
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setCreateDate(tableRowCell.getStringCellValue());
+
+                // Set dueDate
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setDueDate(tableRowCell.getStringCellValue());
+
+                // Add Assignment to to the List
+                assignmentList.add(foundAssign);
+
+                // Increase Row number by one and grab the next Row
+                rowNum++;
+                tableRow = sheet.getRow(rowNum);
+            }
+
+            workbook.close();
+
+            log.info("Getting list of assignments under class: " + classCategory);
+        
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        log.info("AssignmentList size: " + assignmentList.size());
+        
+        return assignmentList;
+    }
+
+    /**
+     * Implementation of findByID() function used to find an assigment by ID
+     * @param id
+     * @return the Assignment found with the ID or null if no assigment could be found
+     */
+    @Override
+    public List<Assignment> findByCurrentlyDue() {
+        // Check if "database" file exists, if not update was not successful
+        if(!doesDBExist()) {
+            log.info("Could not update since no Database Exists");
+            return null;
+        }
+
+        // Assigment Instance to fill up and return to show the
+        // data from the found Assignment in the "database"
+        List<Assignment> assignmentList = new ArrayList<>();
+
+        try {
+            // Open the "database" workbook
+            FileInputStream file = new FileInputStream(FILENAME);
+            XSSFWorkbook workbook = new XSSFWorkbook(file);
+
+            // Grab the Assignments sheet from the workbook
+            XSSFSheet sheet = workbook.getSheet(TABLE_ASSIGNMENTS);
+
+            // Grab Row where assignments start
+            int rowNum = 2;
+            Row tableRow = sheet.getRow(rowNum);
+
+            // Loop through the entire sheet row by row to find the Assignments we want to add
+            while(tableRow != null && tableRow.getLastCellNum() > 0) {
+                // Check if the class of the assignment matches, if not skip to the next row iteration using continue keyword
+                if(!tableRow.getCell(3).toString().toLowerCase().equals("false")) {
+                    rowNum++;
+                    tableRow = sheet.getRow(rowNum);
+                    continue;
+                }
+
+                // Create a new Assignment Object to save info into
+                Assignment foundAssign = new Assignment();
+                foundAssign.setAssignmentID(rowNum);
+                
+                // Keep track of current cell
+                int cellNum = 0;
+                
+                // Set name
+                Cell tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setName(tableRowCell.getStringCellValue());
+
+                // Set description
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setDescription(tableRowCell.getStringCellValue());
+
+                // Set class
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setClassCategory(tableRowCell.getStringCellValue());
+
+                // Set isComplete
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setIsComplete(tableRowCell.getBooleanCellValue());
+
+                // Skip createDate since it shouldn't change
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setCreateDate(tableRowCell.getStringCellValue());
+
+                // Set dueDate
+                cellNum++;
+                tableRowCell = tableRow.getCell(cellNum);
+                foundAssign.setDueDate(tableRowCell.getStringCellValue());
+
+                // Add Assignment to to the List
+                assignmentList.add(foundAssign);
+
+                // Increase Row number by one and grab the next Row
+                rowNum++;
+                tableRow = sheet.getRow(rowNum);
+            }
+
+            workbook.close();
+
+            log.info("Getting list of assignments due");
+        
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        log.info("AssignmentList size: " + assignmentList.size());
+        
+        return assignmentList;
     }
     
 }

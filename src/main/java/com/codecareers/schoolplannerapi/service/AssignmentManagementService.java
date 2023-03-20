@@ -18,7 +18,7 @@ public class AssignmentManagementService {
 
     public int addAssignment(Assignment assignment) {
         // create a SimpleDateFormat object with the desired date format
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
         
         // create a Date object with the current time
         Date currentDate = new Date();
@@ -36,6 +36,14 @@ public class AssignmentManagementService {
         return simpleTextDBImp.findByID(id);
     }
 
+    public List<Assignment> getAssignmentByClass(String classCategory) {
+        return simpleTextDBImp.findByClass(classCategory);
+    }
+
+    public List<Assignment> getAssignmentByCurrentlyDue() {
+        return simpleTextDBImp.findByCurrentlyDue();
+    }
+
     public boolean updateAssignment(Assignment updatedAssignment) {
         return simpleTextDBImp.update(updatedAssignment);
     }
@@ -50,11 +58,6 @@ public class AssignmentManagementService {
     }
 
     public List<Assignment> listCompleteAssignments() {
-
-        return null;
-    }
-
-    public List<Assignment> listAssignmentsByClass() {
 
         return null;
     }

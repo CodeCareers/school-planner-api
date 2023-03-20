@@ -44,11 +44,15 @@ public class Assignment {
         this.createDate = createDate;
         this.dueDate = dueDate;
     }
-
+//redump.org dat files
     // Below here are all the getters and setters for the data above
 
     public int getAssignmentID() {
         return this.assigmentID;
+    }
+
+    public void setAssignmentID(int assigmentID) {
+        this.assigmentID = assigmentID;
     }
 
     public String getName() {
